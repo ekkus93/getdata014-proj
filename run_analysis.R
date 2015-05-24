@@ -616,27 +616,12 @@ mergeDatasets <- function(dir) {
     }
   }
   
-  uciHarDataFrame
-}
-
-#2a - getUciHarMean()
-# DESCRIPTION: Extracts only the measurements on the mean for each measurement. 
-# INPUT: uciHarDataFrame - the output of mergeDatasets()  
-# OUTPUT: returns a vector with the mean for each numeric columns in uciHarDataFrame
-getUciHarMean <- function(uciHarDataFrame) {
-  allColNames <- names(uciHarDataFrame)
-  c <- allColNames[allColNames != 'subject' & allColNames != 'activity'] 
-  m <- apply(uciHarDataFrame[,c], 2, mean)
-}
-
-# 2b - getUciHarSd()
-# DESCRIPTION: Extracts only the measurements on the standard deviation for each measurement. 
-# INPUT: uciHarDataFrame - the output of mergeDatasets()  
-# OUTPUT: returns a vector with the standard deviation for each numeric columns in uciHarDataFrame
-getUciHarSd <- function(uciHarDataFrame) {
-  allColNames <- names(uciHarDataFrame)
-  c <- allColNames[allColNames != 'subject' & allColNames != 'activity'] 
-  bar <- apply(uciHarDataFrame[,c], 2, sd)
+  # 2 - filter out all columns except subject, activity and the mean and std measurements
+  measureCols <- cnames[[2]]
+  filteredMeasureCols <- measureCols[grepl("\\.(mean$|mean\\.|std)", measureCols)]
+  filterCols <- append(filteredMeasureCols, c('subject', 'activity'), after = 0)
+  
+  uciHarDataFrame[, filterCols]
 }
 
 #5 - getTidyUciHarMeanByActivitySubject()
@@ -651,8 +636,6 @@ getTidyUciHarMeanByActivitySubject <- function(uciHarDataFrame) {
   g %>% summarise_each_(funs(mean), c)
 }
   
-
-uciHarDataFrame <- mergeDatasets('UCI HAR Dataset')
-uciHarMean <- getUciHarMean(uciHarDataFrame)
-uciHarSd <- getUciHarSd(uciHarDataFrame)
-tidyUciHarMeanByActivitySubject <- getTidyUciHarMeanByActivitySubject(uciHarDataFrame)
+# uciHarDataFrame <- mergeDatasets('UCI HAR Dataset')
+# tidyUciHarMeanByActivitySubject <- getTidyUciHarMeanByActivitySubject(uciHarDataFrame)
+# write.table(tidyUciHarMeanByActivitySubject, file='tidyUciHarMeanByActivitySubject.txt', row.name=FALSE)
